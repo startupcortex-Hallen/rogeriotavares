@@ -1,0 +1,76 @@
+{
+    "name": "Rogério Tavares 45788 — Deputado Estadual da Bahia",
+    "short_name": "Rogério 45788",
+    "description": "App oficial da campanha de Rogério Tavares, candidato a Deputado Estadual da Bahia — 45788. Plano de governo, notícias, agenda e participação popular.",
+    "start_url": "/",
+    "scope": "/",
+    "display": "standalone",
+    "orientation": "portrait",
+    "background_color": "#0D47A1",
+    "theme_color": "#1565C0",
+    "lang": "pt-BR",
+    "categories": [
+        "news",
+        "government",
+        "social"
+    ],
+    "shortcuts": [
+        {
+            "name": "Plano de Governo",
+            "short_name": "Plano",
+            "url": "/plano",
+            "icons": [
+                {
+                    "src": "icons/Icon-192.png",
+                    "sizes": "192x192"
+                }
+            ]
+        },
+        {
+            "name": "Agenda Oficial",
+            "short_name": "Agenda",
+            "url": "/agenda",
+            "icons": [
+                {
+                    "src": "icons/Icon-192.png",
+                    "sizes": "192x192"
+                }
+            ]
+        },
+        {
+            "name": "Central de Notícias",
+            "short_name": "Notícias",
+            "url": "/noticias",
+            "icons": [
+                {
+                    "src": "icons/Icon-192.png",
+                    "sizes": "192x192"
+                }
+            ]
+        }
+    ],
+    "icons": [
+        {
+            "src": "icons/Icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "icons/Icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        },
+        {
+            "src": "icons/Icon-maskable-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "maskable"
+        },
+        {
+            "src": "icons/Icon-maskable-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
+        }
+    ]
+}

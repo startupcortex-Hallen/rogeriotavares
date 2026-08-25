@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <!-- ============================================================
+       APP OFICIAL — ROGÉRIO TAVARES 45788
+       Deputado Estadual da Bahia • Eleições 2026
+       SEO completo: meta tags, Open Graph, Twitter Cards, JSON-LD
+       ============================================================ -->
+  <base href="$FLUTTER_BASE_HREF">
+
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+
+  <!-- SEO básico -->
+  <title>Rogério Tavares 45788 — Deputado Estadual da Bahia | Plano de Governo, Notícias e Agenda</title>
+  <meta name="description" content="Site e aplicativo oficial da campanha de Rogério Tavares, candidato a Deputado Estadual da Bahia — 45788. Plano de governo, notícias, agenda, transparência, mapa da Bahia e participação popular.">
+  <meta name="keywords" content="Rogério Tavares, 45788, Deputado Estadual, Bahia, Eleições 2026, Plano de Governo, Notícias, Agenda, Campanha">
+  <meta name="author" content="Campanha Rogério Tavares 45788">
+  <meta name="robots" content="index, follow, max-image-preview:large">
+  <meta name="theme-color" content="#1565C0">
+  <link rel="canonical" href="https://SEU-DOMINIO.com.br/">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="pt_BR">
+  <meta property="og:site_name" content="Rogério Tavares 45788">
+  <meta property="og:title" content="Rogério Tavares 45788 — Deputado Estadual da Bahia">
+  <meta property="og:description" content="Plano de governo, notícias, agenda e transparência da campanha 45788. Participe e faça parte da mudança.">
+  <meta property="og:url" content="https://SEU-DOMINIO.com.br/">
+  <meta property="og:image" content="https://dimg.dreamflow.cloud/v1/image/Rog%C3%A9rio+Tavares+smiling+in+a+professional+campaign+portrait+with+Brazilian+flag+background">
+
+  <!-- Twitter Cards -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Rogério Tavares 45788 — Deputado Estadual da Bahia">
+  <meta name="twitter:description" content="Plano de governo, notícias, agenda e transparência da campanha 45788.">
+  <meta name="twitter:image" content="https://dimg.dreamflow.cloud/v1/image/Rog%C3%A9rio+Tavares+smiling+in+a+professional+campaign+portrait+with+Brazilian+flag+background">
+
+  <!-- PWA / iOS -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Rogério 45788">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+  <link rel="apple-touch-startup-image" href="icons/Icon-512.png">
+
+  <!-- Manifest + Favicon -->
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" href="favicon.png">
+
+  <!-- Performance: preconnect CDNs de mídia -->
+  <link rel="preconnect" href="https://dimg.dreamflow.cloud">
+  <link rel="dns-prefetch" href="https://dimg.dreamflow.cloud">
+  <link rel="preconnect" href="https://hpubrzclxyhlodtmigrv.supabase.co">
+  <link rel="dns-prefetch" href="https://hpubrzclxyhlodtmigrv.supabase.co">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <!-- Splash screen (escuro institucional) -->
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: #1565C0;
+    }
+    #splash {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(120% 120% at 50% 0%, #0D47A1 0%, #1565C0 55%, #0D47A1 100%);
+      color: #FFFFFF;
+      font-family: 'Georgia', serif;
+      z-index: 9999;
+    }
+    #splash .num {
+      font-size: 72px;
+      font-weight: 900;
+      letter-spacing: 4px;
+      color: #FFD600;
+      text-shadow: 0 4px 18px rgba(0,0,0,.35);
+    }
+    #splash .name {
+      font-size: 22px;
+      margin-top: 8px;
+      font-weight: 700;
+    }
+    #splash .role {
+      font-size: 13px;
+      margin-top: 4px;
+      opacity: .9;
+      letter-spacing: 2px;
+    }
+    #splash .bar {
+      margin-top: 24px;
+      width: 160px;
+      height: 4px;
+      border-radius: 4px;
+      background: rgba(255,255,255,.2);
+      overflow: hidden;
+    }
+    #splash .bar::after {
+      content: '';
+      display: block;
+      width: 60%;
+      height: 100%;
+      background: #FFD600;
+      animation: load 1.2s ease-in-out infinite alternate;
+    }
+    @keyframes load { from { transform: translateX(-100%);} to { transform: translateX(160%);} }
+  </style>
+</head>
+<body>
+  <!-- Splash de inicialização -->
+  <div id="splash">
+    <div class="num">45788</div>
+    <div class="name">Rogério Tavares</div>
+    <div class="role">DEPUTADO ESTADUAL • BAHIA</div>
+    <div class="bar"></div>
+  </div>
+
+  <script>
+    // Remove o splash quando o Flutter carregar
+    window.addEventListener('flutter-first-frame', function () {
+      var s = document.getElementById('splash');
+      if (s) s.remove();
+    });
+  </script>
+
+  <!-- JSON-LD: Person + WebSite (SEO estruturado) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "PoliticalParty",
+    "name": "Rogério Tavares 45788",
+    "url": "https://SEU-DOMINIO.com.br/",
+    "image": "https://dimg.dreamflow.cloud/v1/image/Rog%C3%A9rio+Tavares+portrait",
+    "description": "Campanha oficial de Rogério Tavares, candidato a Deputado Estadual da Bahia (45788).",
+    "sameAs": [
+      "https://www.instagram.com/",
+      "https://www.facebook.com/"
+    ],
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://SEU-DOMINIO.com.br/?q={search_term_string}",
+      "query-input": "required name=search_term_string"
+    }
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "Rogério Tavares 45788",
+    "url": "https://SEU-DOMINIO.com.br/",
+    "logo": "https://SEU-DOMINIO.com.br/favicon.png",
+    "foundingDate": "2026",
+    "slogan": "Por um Estado mais Forte"
+  }
+  </script>
+
+  <script src="flutter_bootstrap.js" async></script>
+</body>
+</html>
