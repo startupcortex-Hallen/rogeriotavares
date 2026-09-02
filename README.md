@@ -93,6 +93,11 @@ Na primeira publicação, o GitHub Pages precisa estar ativo:
 - Source: **GitHub Actions** (o workflow já tenta ativar isso sozinho na 1ª execução)
 - O site fica disponível em `https://startupcortex-Hallen.github.io/rogeriotavares/`
 
+> ⚠️ **Importante:** o GitHub Pages **não funciona em repositórios privados no
+> plano Free** (o deploy falha com "Your current plan does not support GitHub
+> Pages"). O repositório deve ser **público** para o site ficar no ar:
+> **Settings → General → Danger Zone → Change visibility → Public**.
+
 ### Rotas diretas e atualização de página (sem 404)
 
 O app usa **Path URL Strategy** (URLs sem `#`, ex.: `/noticias`, `/plano/eixos`).
