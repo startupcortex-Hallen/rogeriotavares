@@ -1,7 +1,7 @@
 {
-    "name": "Rogério Tavares 45788 — Deputado Estadual da Bahia",
+    "name": "Rogério Tavares • A Voz do Oeste",
     "short_name": "Rogério 45788",
-    "description": "App oficial da campanha de Rogério Tavares, candidato a Deputado Estadual da Bahia — 45788. Plano de governo, notícias, agenda e participação popular.",
+    "description": "Deputado Estadual da Bahia. Conheça as propostas, agenda, notícias e participe da campanha de Rogério Tavares — 45788.",
     "start_url": "/",
     "scope": "/",
     "display": "standalone",
@@ -16,8 +16,8 @@
     ],
     "shortcuts": [
         {
-            "name": "Plano de Governo",
-            "short_name": "Plano",
+            "name": "Propostas",
+            "short_name": "Propostas",
             "url": "/plano",
             "icons": [
                 {

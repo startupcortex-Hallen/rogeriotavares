@@ -11,6 +11,7 @@ import 'routes/app_router.dart';
 import 'services/realtime_service.dart';
 import 'theme/app_theme.dart';
 import 'utils/formats.dart';
+import 'utils/web_redirect.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,6 +26,12 @@ Future<void> main() async {
   );
 
   runApp(const ProviderScope(child: RogerioApp()));
+
+  // GitHub Pages: ao atualizar/abrir uma rota direta (ex.: /noticias), o
+  // servidor responde 404 e o web/404.html salva o caminho e recarrega a raiz.
+  // Restaura aqui a rota original para a navegação direta funcionar.
+  final pending = pendingRedirectPath();
+  if (pending != null) appRouter.go(pending);
 }
 
 class RogerioApp extends ConsumerStatefulWidget {
