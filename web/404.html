@@ -21,18 +21,31 @@
     .msg { margin-top: 12px; font-size: 16px; opacity: .9; }
   </style>
   <script>
-    // GitHub Pages nao conhece as rotas do Flutter (SPA com Path URL Strategy).
-    // Quando alguem acessa /noticias diretamente (ou atualiza a pagina), o GitHub
-    // retorna 404. Este arquivo salva o caminho pedido e recarrega a raiz;
-    // o app Flutter le o caminho salvo e navega ate ele imediatamente.
+    // GitHub Pages não conhece as rotas do Flutter (SPA com Path URL Strategy).
+    // Ao abrir/atualizar uma rota direta (ex.: /noticias), o GitHub responde 404
+    // e serve este arquivo. Ele salva o caminho pedido em sessionStorage e sobe
+    // os diretórios (./ ou ../) até achar o index.html — funciona no endereço
+    // padrão github.io/rogeriotavares e também no domínio próprio (raiz "/").
     (function () {
-      var path = location.pathname + location.search;
-      if (path && path !== '/' && path !== '/index.html') {
-        try {
+      var prev = null, climbed = null, path = '';
+      try {
+        prev = sessionStorage.getItem('redirect_path');
+        climbed = sessionStorage.getItem('redirect_climbed');
+        path = location.pathname + location.search;
+        if (climbed === path) {
+          // Este nível já foi tentado e não é a raiz: sobe mais um diretório.
+          sessionStorage.removeItem('redirect_climbed');
+          location.replace('../');
+          return;
+        }
+        if (prev !== path) {
           sessionStorage.setItem('redirect_path', path);
-        } catch (e) { /* localStorage indisponivel: segue so com a raiz */ }
+        }
+        sessionStorage.setItem('redirect_climbed', path);
+        location.replace('./');
+      } catch (e) {
+        location.replace('./');
       }
-      location.replace('/');
     })();
   </script>
 </head>

@@ -56,7 +56,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-  <!-- Splash screen (azul institucional da campanha) -->
+  <!-- Fundo azul institucional enquanto o Flutter carrega (sem splash) -->
   <style>
     html, body {
       margin: 0;
@@ -64,72 +64,9 @@
       height: 100%;
       background: #1565C0;
     }
-    #splash {
-      position: fixed;
-      inset: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      background: radial-gradient(120% 120% at 50% 0%, #0D47A1 0%, #1565C0 55%, #0D47A1 100%);
-      color: #FFFFFF;
-      font-family: 'Georgia', serif;
-      z-index: 9999;
-    }
-    #splash .num {
-      font-size: 72px;
-      font-weight: 900;
-      letter-spacing: 4px;
-      color: #FFD600;
-      text-shadow: 0 4px 18px rgba(0,0,0,.35);
-    }
-    #splash .name {
-      font-size: 22px;
-      margin-top: 8px;
-      font-weight: 700;
-    }
-    #splash .role {
-      font-size: 13px;
-      margin-top: 4px;
-      opacity: .9;
-      letter-spacing: 2px;
-    }
-    #splash .bar {
-      margin-top: 24px;
-      width: 160px;
-      height: 4px;
-      border-radius: 4px;
-      background: rgba(255,255,255,.2);
-      overflow: hidden;
-    }
-    #splash .bar::after {
-      content: '';
-      display: block;
-      width: 60%;
-      height: 100%;
-      background: #FFD600;
-      animation: load 1.2s ease-in-out infinite alternate;
-    }
-    @keyframes load { from { transform: translateX(-100%);} to { transform: translateX(160%);} }
   </style>
 </head>
 <body>
-  <!-- Splash de inicialização -->
-  <div id="splash">
-    <div class="num">45788</div>
-    <div class="name">Rogério Tavares</div>
-    <div class="role">DEPUTADO ESTADUAL • BAHIA • A VOZ DO OESTE</div>
-    <div class="bar"></div>
-  </div>
-
-  <script>
-    // Remove o splash quando o Flutter carregar
-    window.addEventListener('flutter-first-frame', function () {
-      var s = document.getElementById('splash');
-      if (s) s.remove();
-    });
-  </script>
-
   <!-- JSON-LD: Person + WebSite (SEO estruturado) -->
   <script type="application/ld+json">
   {
