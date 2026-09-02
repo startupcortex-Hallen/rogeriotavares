@@ -47,26 +47,6 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Ativar GitHub Pages (auto, primeira execucao)
-        shell: bash
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          set +e
-          MSG=$(gh api --method POST repos/${{ github.repository }}/pages -f build_type=workflow 2>&1)
-          RC=$?
-          set -e
-          if [ $RC -eq 0 ] || echo "$MSG" | grep -q "HTTP 409"; then
-            echo "GitHub Pages pronto (ja ativo ou ativado agora)."
-            exit 0
-          fi
-          if echo "$MSG" | grep -qi "does not support"; then
-            echo "::error::GitHub Pages nao esta disponivel: repositório privado no plano Free. Torne o repositório PUBLICO (Settings > General > Change visibility) e rode o workflow novamente."
-          else
-            echo "::error::Falha ao ativar o GitHub Pages: $MSG"
-          fi
-          exit 1
-
       - name: Publicar no GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4

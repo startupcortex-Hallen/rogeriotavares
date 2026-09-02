@@ -90,8 +90,9 @@ Quando o check ficar verde, o site está no ar.
 Na primeira publicação, o GitHub Pages precisa estar ativo:
 
 - **Repository → Settings → Pages**
-- Source: **GitHub Actions** (o workflow já tenta ativar isso sozinho na 1ª execução)
-- O site fica disponível em `https://startupcortex-Hallen.github.io/rogeriotavares/`
+- Source: **GitHub Actions** (uma única vez, manualmente — o token do Actions não
+  tem permissão para criar o site, ele só publica; se preferir, ative via API/UI)
+- O site fica disponível em `https://startupcortex-hallen.github.io/rogeriotavares/`
 
 > ⚠️ **Importante:** o GitHub Pages **não funciona em repositórios privados no
 > plano Free** (o deploy falha com "Your current plan does not support GitHub
