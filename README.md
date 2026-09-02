@@ -69,7 +69,8 @@ flutter run -d chrome                                        # abrir no navegado
 Build de produção (o mesmo que o GitHub Actions executa):
 
 ```bash
-flutter build web --release
+flutter build web --release --base-href /rogeriotavares/   # endereço GitHub Pages
+flutter build web --release --base-href /                  # quando o domínio próprio estiver ativo
 ```
 
 > O site pronto fica em `build/web/`.
@@ -133,12 +134,20 @@ Depois de propagar (alguns minutos a poucas horas):
 2. Marque **Enforce HTTPS** (certificado automático em minutos).
 
 > ⚠️ Enquanto o DNS não estiver configurado, acesse o site pelo endereço padrão
-> `https://startupcortex-Hallen.github.io/rogeriotavares/`. O link direto para o
-> domínio só responde depois que os registros DNS acima estiverem ativos.
-> O `CNAME` já está no repositório para que nada mais precise ser alterado no código.
+> `https://startupcortex-hallen.github.io/rogeriotavares/`.
 
-Ao ativar o domínio, nenhuma mudança de código é necessária: o site já é servido
-na raiz (`--base-href /`).
+### Ativar o domínio (passo final no código)
+
+O build usa `--base-href /rogeriotavares/` (endereço padrão do GitHub Pages).
+Quando o domínio próprio estiver respondendo em `rogeriotavares.com.br`, mude o
+base para a raiz criando uma **variável de repositório** no GitHub:
+
+**Settings → Secrets and variables → Actions → Variables → New variable**
+- Name: `BASE_HREF`
+- Value: `/`
+
+Depois faça um `git push` (ou re-execute o workflow) — o site passa a ser
+servido na raiz do domínio. Nenhuma outra mudança é necessária.
 
 ---
 

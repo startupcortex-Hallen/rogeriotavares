@@ -32,7 +32,12 @@ jobs:
         run: flutter pub get
 
       - name: Build de producao (flutter build web --release)
-        run: flutter build web --release --base-href /
+        shell: bash
+        env:
+          BASE_HREF: ${{ vars.BASE_HREF }}
+        run: |
+          BASE_HREF="${BASE_HREF:-/rogeriotavares/}"
+          flutter build web --release --base-href "$BASE_HREF"
 
       - name: Upload do site (build/web)
         uses: actions/upload-pages-artifact@v3
