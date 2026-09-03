@@ -67,6 +67,7 @@ class AppDrawer extends ConsumerWidget {
       } else if (entry.path != null) {
         context.go(entry.path!);
       }
+      if (!fixed && Navigator.canPop(context)) Navigator.of(context).pop();
     }
 
     return Drawer(
@@ -252,16 +253,14 @@ class AppShell extends ConsumerWidget {
 
     if (isDesktop) {
       return Scaffold(
-        body: Row(
-          children: [
-            SizedBox(width: 300, child: AppDrawer(navigationShell: navigationShell, fixed: true)),
-            Expanded(child: navigationShell),
-          ],
-        ),
+        key: appScaffoldKey,
+        drawer: AppDrawer(navigationShell: navigationShell),
+        body: navigationShell,
       );
     }
 
     return Scaffold(
+      key: appScaffoldKey,
       drawer: AppDrawer(navigationShell: navigationShell),
       body: navigationShell,
     );
