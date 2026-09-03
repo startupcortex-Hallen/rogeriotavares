@@ -4,4 +4,4 @@ Allow: /
 Disallow: /admin
 Disallow: /admin/
 
-Sitemap: https://rogeriotavares.com.br/sitemap.xml
+Sitemap: https://www.rogeriotavares.com.br/sitemap.xml

@@ -36,8 +36,12 @@ jobs:
         env:
           BASE_HREF: ${{ vars.BASE_HREF }}
         run: |
-          BASE_HREF="${BASE_HREF:-/rogeriotavares/}"
+          BASE_HREF="${BASE_HREF:-/}"
           flutter build web --release --base-href "$BASE_HREF"
+
+      - name: Copiar CNAME para o artefato (dominio customizado)
+        shell: bash
+        run: cp CNAME build/web/CNAME
 
       - name: Upload do site (build/web)
         uses: actions/upload-pages-artifact@v3

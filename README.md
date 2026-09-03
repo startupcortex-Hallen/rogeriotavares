@@ -5,7 +5,7 @@
 Site e aplicativo oficial da campanha de **Rogério Tavares (45788)**, candidato a
 **Deputado Estadual da Bahia**. Publicado automaticamente no **GitHub Pages** com
 **HTTPS**, rotas limpas (sem `#`), PWA instalável e pronto para conexão do domínio
-próprio `rogeriotavares.com.br`.
+próprio `www.rogeriotavares.com.br`.
 
 O conteúdo é 100% dinâmico via **Supabase**: notícias, plano de governo (propostas),
 agenda, galeria, vídeos, transparência, voluntários, demandas e painel administrativo.
@@ -69,8 +69,7 @@ flutter run -d chrome                                        # abrir no navegado
 Build de produção (o mesmo que o GitHub Actions executa):
 
 ```bash
-flutter build web --release --base-href /rogeriotavares/   # endereço GitHub Pages
-flutter build web --release --base-href /                  # quando o domínio próprio estiver ativo
+flutter build web --release --base-href /   # domínio próprio (www.rogeriotavares.com.br)
 ```
 
 > O site pronto fica em `build/web/`.
@@ -94,6 +93,7 @@ Na primeira publicação, o GitHub Pages precisa estar ativo:
 - Source: **GitHub Actions** (uma única vez, manualmente — o token do Actions não
   tem permissão para criar o site, ele só publica; se preferir, ative via API/UI)
 - O site fica disponível em `https://startupcortex-hallen.github.io/rogeriotavares/`
+  (redirecionando para `https://www.rogeriotavares.com.br/` quando o DNS estiver ativo)
 
 > ⚠️ **Importante:** o GitHub Pages **não funciona em repositórios privados no
 > plano Free** (o deploy falha com "Your current plan does not support GitHub
@@ -110,15 +110,17 @@ diretamente responde 404 no servidor — resolvido por:
 - `lib/utils/web_redirect.dart` → o app lê o caminho salvo e navega para ele.
 
 Resultado: abrir ou atualizar **qualquer URL** funciona perfeitamente
-(ex.: `rogeriotavares.com.br/noticias/minha-noticia`).
+(ex.: `www.rogeriotavares.com.br/noticias/minha-noticia`).
 
 ---
 
-## 5. Conectar o domínio próprio (`rogeriotavares.com.br`)
+## 5. Conectar o domínio próprio (`www.rogeriotavares.com.br`)
 
-O arquivo **`CNAME`** (raiz do repositório) já contém `rogeriotavares.com.br`.
-Falta apenas apontar o DNS do domínio para o GitHub — feito no painel do seu
-registrador (Registro.br, Hostinger, etc.):
+O arquivo **`CNAME`** (raiz do repositório) contém `www.rogeriotavares.com.br` e é
+copiado pelo workflow (`deploy.yml`) para dentro do artefato publicado no GitHub
+Pages — é isso que faz o domínio customizado ser reconhecido. Falta apenas apontar
+o DNS do domínio para o GitHub — feito no painel do seu registrador
+(Registro.br, Hostinger, etc.):
 
 | Tipo | Nome | Valor |
 |------|------|-------|
@@ -130,24 +132,28 @@ registrador (Registro.br, Hostinger, etc.):
 
 Depois de propagar (alguns minutos a poucas horas):
 
-1. **Settings → Pages → Custom domain** → `rogeriotavares.com.br` → **Save**.
+1. **Settings → Pages → Custom domain** → `www.rogeriotavares.com.br` → **Save**.
 2. Marque **Enforce HTTPS** (certificado automático em minutos).
+
+> ⚠️ Com o CNAME em `www`, o GitHub Pages serve o subdomínio `www`. A raiz
+> (`rogeriotavares.com.br`) **redireciona para `www`** automaticamente quando os
+> registros A acima apontam para o GitHub.
 
 > ⚠️ Enquanto o DNS não estiver configurado, acesse o site pelo endereço padrão
 > `https://startupcortex-hallen.github.io/rogeriotavares/`.
 
 ### Ativar o domínio (passo final no código)
 
-O build usa `--base-href /rogeriotavares/` (endereço padrão do GitHub Pages).
-Quando o domínio próprio estiver respondendo em `rogeriotavares.com.br`, mude o
-base para a raiz criando uma **variável de repositório** no GitHub:
+Por padrão o build usa `--base-href /` (raiz do domínio próprio) — já configurado
+no `deploy.yml`. Caso precise de outro caminho para o base, crie a variável de
+repositório no GitHub:
 
 **Settings → Secrets and variables → Actions → Variables → New variable**
 - Name: `BASE_HREF`
-- Value: `/`
+- Value: `/` (ou o caminho desejado, ex.: `/rogeriotavares/`)
 
 Depois faça um `git push` (ou re-execute o workflow) — o site passa a ser
-servido na raiz do domínio. Nenhuma outra mudança é necessária.
+servido no caminho configurado. Nenhuma outra mudança é necessária.
 
 ---
 
@@ -171,7 +177,7 @@ Edite tudo pelo **Painel Admin** (`/admin`) — sem recompilar o site.
 
 ```
 .github/workflows/deploy.yml   GitHub Actions: build + publica no GitHub Pages
-CNAME                          domínio próprio (rogeriotavares.com.br)
+CNAME                          domínio próprio (www.rogeriotavares.com.br)
 web/
   index.html                   SEO completo (OG, Twitter, JSON-LD, PWA)
   404.html                     fallback SPA → rotas diretas sem 404
