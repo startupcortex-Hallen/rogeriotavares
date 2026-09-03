@@ -117,10 +117,16 @@ Resultado: abrir ou atualizar **qualquer URL** funciona perfeitamente
 ## 5. Conectar o domínio próprio (`www.rogeriotavares.com.br`)
 
 O arquivo **`CNAME`** (raiz do repositório) contém `www.rogeriotavares.com.br` e é
-copiado pelo workflow (`deploy.yml`) para dentro do artefato publicado no GitHub
-Pages — é isso que faz o domínio customizado ser reconhecido. Falta apenas apontar
-o DNS do domínio para o GitHub — feito no painel do seu registrador
-(Registro.br, Hostinger, etc.):
+também copiado pelo workflow para dentro do artefato (fica disponível no site
+servido, útil se um dia o deploy for por branch). **Importante:** quando a
+publicação é via GitHub Actions, o GitHub **ignora o arquivo CNAME** — o domínio
+precisa ser registrado uma única vez em **Settings → Pages → Custom domain**
+(`www.rogeriotavares.com.br` → **Save**; pode ser feito pela API `PUT
+/repos/{owner}/{repo}/pages` com `cname`). O GitHub valida o DNS e emite o
+certificado TLS automaticamente.
+
+Depois de registrar o domínio, basta o DNS apontar para o GitHub — feito no
+painel do seu registrador (Registro.br, Hostinger, etc.):
 
 | Tipo | Nome | Valor |
 |------|------|-------|
