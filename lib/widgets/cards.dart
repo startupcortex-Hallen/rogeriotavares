@@ -33,7 +33,11 @@ class NewsCard extends StatelessWidget {
           children: [
             Stack(
               children: [
-                RtImage(url: item.imageUrl, height: compact ? 120 : 170, width: double.infinity),
+                // 16:9 fixo — imagem profissional 1280×720 ou 800×450 não corta rosto.
+                AspectRatio(
+                  aspectRatio: 16 / 9,
+                  child: RtImage(url: item.imageUrl, width: double.infinity, fit: BoxFit.cover),
+                ),
                 Positioned(top: RtSpace.sm, left: RtSpace.sm,
                     child: RtBadge(label: category, color: p.primary.withValues(alpha: 0.92), textColor: p.onPrimary)),
               ],
@@ -96,8 +100,11 @@ class NewsFeedItem extends StatelessWidget {
             children: [
               Stack(
                 children: [
-                  RtImage(url: item.imageUrl, width: 96, height: 96,
-                      placeholderIcon: Icons.newspaper_rounded),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(RtRadius.md),
+                    child: RtImage(url: item.imageUrl, width: 96, height: 96,
+                        fit: BoxFit.cover, placeholderIcon: Icons.newspaper_rounded),
+                  ),
                   if (isVideo || item.isVideo)
                     Positioned.fill(
                       child: Center(

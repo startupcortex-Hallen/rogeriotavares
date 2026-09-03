@@ -43,23 +43,38 @@ class _HeroCarouselState extends ConsumerState<HeroCarousel> {
       _restartTimer(total);
     }
 
-    if (total == 0) {
-      return SizedBox(
-        height: widget.height,
-        child: ClipRRect(
+    // Responsivo: evita corte — 16:9 mobile, 2.4:1 desktop (banner largo mas não gigante).
+    // Tamanhos profissionais recomendados:
+    //   mobile: 1280×720 (16:9), desktop: 1600×670 (21:9/2.4), safe-area central 70%.
+    final width = MediaQuery.sizeOf(context).width;
+    final isMobile = width < 620;
+    final aspect = isMobile ? 16 / 9 : 2.4;
+    // Altura máxima para desktop não virar “tela cheia”.
+    final maxH = isMobile ? 420.0 : 420.0;
+
+    Widget roundedImage(String url) => ClipRRect(
           borderRadius: BorderRadius.circular(RtRadius.xl),
-          child: RtImage(
-            url:
-                'https://dimg.dreamflow.cloud/v1/image/Rog%C3%A9rio+Tavares+smiling+in+a+professional+campaign+portrait+with+Brazilian+flag+background',
+          child: AspectRatio(
+            aspectRatio: aspect,
+            child: RtImage(url: url, fit: BoxFit.cover),
           ),
+        );
+
+    if (total == 0) {
+      return ConstrainedBox(
+        constraints: BoxConstraints(maxHeight: maxH),
+        child: roundedImage(
+          'https://dimg.dreamflow.cloud/v1/image/Rog%C3%A9rio+Tavares+smiling+in+a+professional+campaign+portrait+with+Brazilian+flag+background',
         ),
       );
     }
 
-    return SizedBox(
-      height: widget.height,
-      child: Stack(
-        children: [
+    return ConstrainedBox(
+      constraints: BoxConstraints(maxHeight: maxH),
+      child: AspectRatio(
+        aspectRatio: aspect,
+        child: Stack(
+          children: [
           // Pausa o auto-play enquanto o usuário interage (estilo streaming)
           Listener(
             onPointerDown: (_) => _timer?.cancel(),
@@ -78,7 +93,7 @@ class _HeroCarouselState extends ConsumerState<HeroCarousel> {
                   padding: const EdgeInsets.symmetric(horizontal: 4),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(RtRadius.xl),
-                    child: RtImage(url: slide.imageUrl),
+                    child: RtImage(url: slide.imageUrl, fit: BoxFit.cover),
                   ),
                 );
               },
@@ -128,6 +143,7 @@ class _HeroCarouselState extends ConsumerState<HeroCarousel> {
             ),
           ),
         ],
+        ),
       ),
     );
   }
