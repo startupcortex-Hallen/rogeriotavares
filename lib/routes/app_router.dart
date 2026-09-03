@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../admin/admin_content_crud.dart';
 import '../admin/admin_dashboard.dart';
+import '../admin/admin_engagement.dart';
 import '../admin/admin_shell.dart';
 import '../admin/admin_special.dart';
 import '../admin/login_page.dart';
@@ -197,6 +198,10 @@ final appRouter = GoRouter(
           builder: (context, state) => const AdminReportsList(),
         ),
         GoRoute(
+          path: '/admin/comentarios',
+          builder: (context, state) => const AdminCommentsList(),
+        ),
+        GoRoute(
           path: '/admin/downloads',
           builder: (context, state) => const AdminDownloadsList(),
         ),
@@ -211,6 +216,10 @@ final appRouter = GoRouter(
         GoRoute(
           path: '/admin/biografia',
           builder: (context, state) => const AdminBiographyList(),
+        ),
+        GoRoute(
+          path: '/admin/usuarios',
+          builder: (context, state) => const AdminUsersPage(),
         ),
         GoRoute(
           path: '/admin/notificacoes',

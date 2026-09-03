@@ -24,8 +24,8 @@ abstract final class Env {
   /// Ano eleitoral.
   static const int electionYear = 2026;
 
-  /// DOMÍNIO DO SITE — troque quando comprar o domínio.
-  static const String kSiteDomain = 'https://SEU-DOMINIO.com.br';
+  /// DOMÍNIO DO SITE — usado nos links compartilhados (share).
+  static const String kSiteDomain = 'https://www.rogeriotavares.com.br';
 
   /// Imagem oficial de retrato (design).
   static const String defaultPortrait =

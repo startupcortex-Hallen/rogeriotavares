@@ -63,6 +63,48 @@ class EngagementRepository {
   Future<void> deleteComment(String id) async =>
       _client.from('comments').delete().eq('id', id);
 
+  /// Comentários para a moderação do painel (v_comments traz o autor).
+  Future<List<Map<String, dynamic>>> fetchCommentsAdmin({bool? pendingOnly}) async {
+    var q = _client.from('v_comments').select();
+    if (pendingOnly == true) {
+      q = q.eq('is_approved', false);
+    }
+    return q.order('created_at', ascending: false);
+  }
+
+  /// Aprova / oculta um comentário (moderação).
+  Future<void> setCommentApproved(String id, bool approved) async {
+    await _client.from('comments').update({'is_approved': approved}).eq('id', id);
+  }
+
+  // ---- Gestão de equipe (RPCs de admin) ----
+  Future<dynamic> createStaffUser({
+    required String email,
+    required String password,
+    required String fullName,
+    required String role,
+  }) async {
+    return _client.rpc('create_staff_user', params: {
+      'p_email': email,
+      'p_password': password,
+      'p_full_name': fullName,
+      'p_role': role,
+    });
+  }
+
+  Future<void> adminUpdateProfile(
+    String userId, {
+    String? role,
+    bool? isActive,
+  }) async {
+    final params = <String, dynamic>{
+      'p_user_id': userId,
+      if (role != null) 'p_role': role,
+      if (isActive != null) 'p_is_active': isActive,
+    };
+    await _client.rpc('admin_update_profile', params: params);
+  }
+
   // ---- Notificações ----
   Future<List<NotificationItem>> fetchNotifications() async {
     var q = _client.from('notifications').select().eq('is_active', true);

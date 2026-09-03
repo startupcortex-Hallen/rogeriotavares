@@ -13,6 +13,8 @@ enum FieldType {
   text,
   textarea,
   number,
+  decimal,
+  lines,
   select,
   chips,
   datetime,
@@ -431,6 +433,10 @@ final _rowsProvider = FutureProvider.family<List<Map<String, dynamic>>, String>(
   return rows.map((r) => Map<String, dynamic>.from(r)).toList();
 });
 
+/// Invalida as listas do CRUD genérico (usado por ações que inserem fora
+/// do formulário, ex.: upload de PDF em Downloads).
+void invalidateAdminRows(WidgetRef ref) => ref.invalidate(_rowsProvider);
+
 /// Página de formulário em tela cheia.
 class _CrudFormPage extends StatefulWidget {
   const _CrudFormPage({
@@ -534,8 +540,12 @@ class _CrudFormState extends ConsumerState<_CrudForm> {
     super.initState();
     for (final f in widget.fields) {
       _values[f.key] = widget.initial[f.key];
-      if (f.type == FieldType.text || f.type == FieldType.textarea || f.type == FieldType.number) {
-        _controllers[f.key] = TextEditingController(text: widget.initial[f.key]?.toString() ?? '');
+      if (f.type == FieldType.text ||
+          f.type == FieldType.textarea ||
+          f.type == FieldType.number ||
+          f.type == FieldType.decimal ||
+          f.type == FieldType.lines) {
+        _controllers[f.key] = TextEditingController(text: _initialText(f));
       }
     }
     // Sincroniza o texto dos controllers com o valor inicial (após o 1º frame).
@@ -543,10 +553,19 @@ class _CrudFormState extends ConsumerState<_CrudForm> {
       for (final f in widget.fields) {
         final c = _controllers[f.key];
         if (c != null) {
-          c.text = widget.initial[f.key]?.toString() ?? '';
+          c.text = _initialText(f);
         }
       }
     });
+  }
+
+  /// Texto inicial do controller (linhas → array vira cada linha).
+  String _initialText(FieldSpec f) {
+    final v = widget.initial[f.key];
+    if (f.type == FieldType.lines && v is List) {
+      return v.map((e) => e.toString().trim()).where((e) => e.isNotEmpty).join('\n');
+    }
+    return v?.toString() ?? '';
   }
 
   @override
@@ -615,6 +634,19 @@ class _CrudFormState extends ConsumerState<_CrudForm> {
     // DEFAULTs do banco (ex.: status) e causa erro 23502 (not-null violation).
     final payload = Map<String, dynamic>.from(_values)
       ..removeWhere((_, v) => v == null);
+    // Campos do tipo "linhas" (text[]) → vira lista (uma linha por item).
+    for (final f in widget.fields) {
+      if (f.type == FieldType.lines) {
+        final raw = payload[f.key];
+        payload[f.key] = raw is String
+            ? raw
+                .split('\n')
+                .map((e) => e.trim())
+                .where((e) => e.isNotEmpty)
+                .toList()
+            : (raw is List ? raw : const <String>[]);
+      }
+    }
     widget.onResult(payload);
   }
 
@@ -646,6 +678,29 @@ class _CrudFormState extends ConsumerState<_CrudForm> {
             _values[f.key] = intValue ?? double.tryParse(v)?.toInt() ?? 0;
           },
           decoration: InputDecoration(labelText: f.label),
+        );
+      case FieldType.decimal:
+        return TextField(
+          controller: controller,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          onChanged: (v) {
+            final parsed = double.tryParse(v.trim().replaceAll(',', '.'));
+            if (parsed != null) {
+              _values[f.key] = parsed;
+            }
+          },
+          decoration: InputDecoration(labelText: f.label),
+        );
+      case FieldType.lines:
+        return TextField(
+          controller: controller,
+          onChanged: (v) => _values[f.key] = v,
+          maxLines: f.maxLines,
+          decoration: InputDecoration(
+            labelText: f.label,
+            hintText: 'Um item por linha',
+            alignLabelWithHint: true,
+          ),
         );
       case FieldType.select:
         return _SelectField(field: f, value: value, onChanged: (v) => _values[f.key] = v);

@@ -502,6 +502,45 @@ class _AdminReportsListState extends ConsumerState<AdminReportsList> {
                                     icon: const Icon(Icons.close_rounded, size: 16),
                                     label: const Text('Recusar'),
                                   ),
+                                  OutlinedButton.icon(
+                                    onPressed: () async {
+                                      final controller =
+                                          TextEditingController(text: r.adminNote);
+                                      final note = await showDialog<String>(
+                                        context: context,
+                                        builder: (ctx) => AlertDialog(
+                                          title: const Text('Nota da demanda'),
+                                          content: TextField(
+                                            controller: controller,
+                                            maxLines: 3,
+                                            autofocus: true,
+                                            decoration: const InputDecoration(
+                                              hintText: 'Ex.: equipe já acionou a gestão do município...',
+                                            ),
+                                          ),
+                                          actions: [
+                                            TextButton(
+                                                onPressed: () => Navigator.pop(ctx),
+                                                child: const Text('Cancelar')),
+                                            FilledButton(
+                                                onPressed: () =>
+                                                    Navigator.pop(ctx, controller.text.trim()),
+                                                child: const Text('Salvar')),
+                                          ],
+                                        ),
+                                      );
+                                      controller.dispose();
+                                      if (note == null || !context.mounted) return;
+                                      await runAdminAction(context, ref, () async {
+                                        await ref
+                                            .read(participationRepositoryProvider)
+                                            .updateReportNote(r.id!, note);
+                                        ref.invalidate(_reportsProvider(_filter));
+                                      }, success: note.isEmpty ? 'Nota removida.' : 'Nota salva.');
+                                    },
+                                    icon: const Icon(Icons.note_add_rounded, size: 16),
+                                    label: const Text('Nota'),
+                                  ),
                                   IconButton(
                                     onPressed: () async {
                                       final ok = await confirmAction(context, 'Excluir', 'Excluir demanda?');
@@ -843,10 +882,29 @@ class _AdminSettingsPageState extends ConsumerState<AdminSettingsPage> {
   final _phone = TextEditingController();
   final _address = TextEditingController();
   final _hours = TextEditingController();
+  final _securityNotice = TextEditingController();
   final _siteName = TextEditingController();
   final _siteDescription = TextEditingController();
   final _agendaDisclaimer = TextEditingController();
+  final _chatTitle = TextEditingController();
+  final _chatSubtitle = TextEditingController();
   final _chatWelcome = TextEditingController();
+  // Hero
+  final _heroPortraitUrl = TextEditingController();
+  final _heroSubtitle = TextEditingController();
+  // Campaign
+  final _campaignName = TextEditingController();
+  final _campaignElectionYear = TextEditingController(text: '2026');
+  final _campaignPortraitUrl = TextEditingController();
+  // CTA
+  final _ctaLabel = TextEditingController();
+  final _ctaSubtitle = TextEditingController();
+  final _ctaDownloadButton = TextEditingController();
+  final _ctaColor = TextEditingController();
+  // Transparency
+  final _transparencyTitle = TextEditingController();
+  final _transparencySubtitle = TextEditingController();
+  final _transparencyDescription = TextEditingController();
   bool _saving = false;
 
   @override
@@ -858,16 +916,35 @@ class _AdminSettingsPageState extends ConsumerState<AdminSettingsPage> {
     final platform = settings['platform'] ?? const {};
     final agenda = settings['agenda'] ?? const {};
     final chat = settings['chat'] ?? const {};
+    final hero = settings['hero'] ?? const {};
+    final campaign = settings['campaign'] ?? const {};
+    final cta = settings['cta'] ?? const {};
+    final transparency = settings['transparency'] ?? const {};
 
     _whatsapp.text = (contact['whatsapp'] as String?) ?? '';
     _email.text = (contact['email'] as String?) ?? '';
     _phone.text = (contact['phone'] as String?) ?? '';
     _address.text = (contact['address'] as String?) ?? '';
     _hours.text = (contact['hours'] as String?) ?? '';
+    _securityNotice.text = (contact['security_notice'] as String?) ?? '';
     _siteName.text = (site['name'] as String?) ?? '';
     _siteDescription.text = (platform['description'] as String?) ?? '';
     _agendaDisclaimer.text = (agenda['disclaimer'] as String?) ?? '';
+    _chatTitle.text = (chat['title'] as String?) ?? '';
+    _chatSubtitle.text = (chat['subtitle'] as String?) ?? '';
     _chatWelcome.text = (chat['welcome'] as String?) ?? '';
+    _heroPortraitUrl.text = (hero['portrait_url'] as String?) ?? '';
+    _heroSubtitle.text = (hero['subtitle'] as String?) ?? '';
+    _campaignName.text = (campaign['name'] as String?) ?? '';
+    _campaignElectionYear.text = '${campaign['election_year'] ?? 2026}';
+    _campaignPortraitUrl.text = (campaign['portrait_url'] as String?) ?? '';
+    _ctaLabel.text = (cta['label'] as String?) ?? '';
+    _ctaSubtitle.text = (cta['subtitle'] as String?) ?? '';
+    _ctaDownloadButton.text = (cta['download_plan_button'] as String?) ?? '';
+    _ctaColor.text = (cta['color'] as String?) ?? '';
+    _transparencyTitle.text = (transparency['title'] as String?) ?? '';
+    _transparencySubtitle.text = (transparency['subtitle'] as String?) ?? '';
+    _transparencyDescription.text = (transparency['description'] as String?) ?? '';
   }
 
   @override
@@ -877,10 +954,25 @@ class _AdminSettingsPageState extends ConsumerState<AdminSettingsPage> {
     _phone.dispose();
     _address.dispose();
     _hours.dispose();
+    _securityNotice.dispose();
     _siteName.dispose();
     _siteDescription.dispose();
     _agendaDisclaimer.dispose();
+    _chatTitle.dispose();
+    _chatSubtitle.dispose();
     _chatWelcome.dispose();
+    _heroPortraitUrl.dispose();
+    _heroSubtitle.dispose();
+    _campaignName.dispose();
+    _campaignElectionYear.dispose();
+    _campaignPortraitUrl.dispose();
+    _ctaLabel.dispose();
+    _ctaSubtitle.dispose();
+    _ctaDownloadButton.dispose();
+    _ctaColor.dispose();
+    _transparencyTitle.dispose();
+    _transparencySubtitle.dispose();
+    _transparencyDescription.dispose();
     super.dispose();
   }
 
@@ -895,6 +987,7 @@ class _AdminSettingsPageState extends ConsumerState<AdminSettingsPage> {
           title: 'Configurações',
           subtitle: 'Contato do comitê, textos do app e avisos. Salvos em settings (banco).',
         ),
+        // CONTATO
         Card(
           child: Padding(
             padding: const EdgeInsets.all(RtSpace.md),
@@ -907,77 +1000,177 @@ class _AdminSettingsPageState extends ConsumerState<AdminSettingsPage> {
                         .titleSmall
                         ?.copyWith(fontWeight: FontWeight.w700)),
                 const SizedBox(height: RtSpace.md),
-                TextField(
-                  controller: _whatsapp,
-                  keyboardType: TextInputType.phone,
-                  decoration: const InputDecoration(labelText: 'WhatsApp (com DDI)'),
-                ),
+                TextField(controller: _whatsapp, keyboardType: TextInputType.phone, decoration: const InputDecoration(labelText: 'WhatsApp (com DDI)')),
                 const SizedBox(height: RtSpace.md),
-                TextField(
-                  controller: _email,
-                  keyboardType: TextInputType.emailAddress,
-                  decoration: const InputDecoration(labelText: 'Email'),
-                ),
+                TextField(controller: _email, keyboardType: TextInputType.emailAddress, decoration: const InputDecoration(labelText: 'Email')),
                 const SizedBox(height: RtSpace.md),
-                TextField(
-                  controller: _phone,
-                  keyboardType: TextInputType.phone,
-                  decoration: const InputDecoration(labelText: 'Telefone fixo'),
-                ),
+                TextField(controller: _phone, keyboardType: TextInputType.phone, decoration: const InputDecoration(labelText: 'Telefone fixo')),
                 const SizedBox(height: RtSpace.md),
-                TextField(
-                  controller: _address,
-                  decoration: const InputDecoration(labelText: 'Endereço do comitê'),
-                ),
+                TextField(controller: _address, decoration: const InputDecoration(labelText: 'Endereço do comitê')),
                 const SizedBox(height: RtSpace.md),
-                TextField(
-                  controller: _hours,
-                  decoration: const InputDecoration(labelText: 'Horário de atendimento'),
-                ),
+                TextField(controller: _hours, decoration: const InputDecoration(labelText: 'Horário de atendimento')),
+                const SizedBox(height: RtSpace.md),
+                TextField(controller: _securityNotice, maxLines: 2, decoration: const InputDecoration(labelText: 'Aviso de segurança / CNPJ')),
               ],
             ),
           ),
         ),
         const SizedBox(height: RtSpace.md),
+        // HERO
         Card(
           child: Padding(
             padding: const EdgeInsets.all(RtSpace.md),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Textos do app',
+                Text('Retrato do candidato (Hero)',
                     style: Theme.of(context)
                         .textTheme
                         .titleSmall
                         ?.copyWith(fontWeight: FontWeight.w700)),
                 const SizedBox(height: RtSpace.md),
-                TextField(
-                  controller: _siteName,
-                  decoration: const InputDecoration(labelText: 'Nome do site/aplicativo'),
-                ),
+                TextField(controller: _heroPortraitUrl, decoration: const InputDecoration(labelText: 'URL do retrato (hero)', hintText: 'https://...')),
                 const SizedBox(height: RtSpace.md),
-                TextField(
-                  controller: _siteDescription,
-                  maxLines: 3,
-                  decoration: const InputDecoration(labelText: 'Descrição da campanha (Home)'),
-                ),
-                const SizedBox(height: RtSpace.md),
-                TextField(
-                  controller: _agendaDisclaimer,
-                  maxLines: 3,
-                  decoration: const InputDecoration(labelText: 'Aviso da agenda (disclaimer)'),
-                ),
-                const SizedBox(height: RtSpace.md),
-                TextField(
-                  controller: _chatWelcome,
-                  maxLines: 2,
-                  decoration: const InputDecoration(labelText: 'Mensagem de boas-vindas do Gabinete'),
-                ),
+                TextField(controller: _heroSubtitle, maxLines: 2, decoration: const InputDecoration(labelText: 'Subtítulo do hero')),
               ],
             ),
           ),
         ),
         const SizedBox(height: RtSpace.md),
+        // CAMPANHA
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(RtSpace.md),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Campanha',
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleSmall
+                        ?.copyWith(fontWeight: FontWeight.w700)),
+                const SizedBox(height: RtSpace.md),
+                TextField(controller: _campaignName, decoration: const InputDecoration(labelText: 'Nome da campanha', hintText: 'ELEIÇÕES 2026')),
+                const SizedBox(height: RtSpace.md),
+                TextField(controller: _campaignElectionYear, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Ano da eleição')),
+                const SizedBox(height: RtSpace.md),
+                TextField(controller: _campaignPortraitUrl, decoration: const InputDecoration(labelText: 'URL retrato (fallback do hero)', hintText: 'https://...')),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: RtSpace.md),
+        // CTA
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(RtSpace.md),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Chamada para ação (CTA)',
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleSmall
+                        ?.copyWith(fontWeight: FontWeight.w700)),
+                const SizedBox(height: RtSpace.md),
+                TextField(controller: _ctaLabel, decoration: const InputDecoration(labelText: 'Rótulo do botão')),
+                const SizedBox(height: RtSpace.md),
+                TextField(controller: _ctaSubtitle, maxLines: 2, decoration: const InputDecoration(labelText: 'Subtítulo / frase de apoio')),
+                const SizedBox(height: RtSpace.md),
+                TextField(controller: _ctaDownloadButton, decoration: const InputDecoration(labelText: 'Texto do botão "Baixar Plano"')),
+                const SizedBox(height: RtSpace.md),
+                TextField(controller: _ctaColor, decoration: const InputDecoration(labelText: 'Cor do CTA (hex)', hintText: '#1B6B3D')),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: RtSpace.md),
+        // TRANSPARÊNCIA
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(RtSpace.md),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Transparência',
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleSmall
+                        ?.copyWith(fontWeight: FontWeight.w700)),
+                const SizedBox(height: RtSpace.md),
+                TextField(controller: _transparencyTitle, decoration: const InputDecoration(labelText: 'Título da página de transparência')),
+                const SizedBox(height: RtSpace.md),
+                TextField(controller: _transparencySubtitle, decoration: const InputDecoration(labelText: 'Subtítulo')),
+                const SizedBox(height: RtSpace.md),
+                TextField(controller: _transparencyDescription, maxLines: 3, decoration: const InputDecoration(labelText: 'Descrição')),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: RtSpace.md),
+        // AGENDA
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(RtSpace.md),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Agenda',
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleSmall
+                        ?.copyWith(fontWeight: FontWeight.w700)),
+                const SizedBox(height: RtSpace.md),
+                TextField(controller: _agendaDisclaimer, maxLines: 3, decoration: const InputDecoration(labelText: 'Aviso da agenda (disclaimer)')),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: RtSpace.md),
+        // CHAT
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(RtSpace.md),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Chat / Gabinete Digital',
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleSmall
+                        ?.copyWith(fontWeight: FontWeight.w700)),
+                const SizedBox(height: RtSpace.md),
+                TextField(controller: _chatTitle, decoration: const InputDecoration(labelText: 'Título do chat')),
+                const SizedBox(height: RtSpace.md),
+                TextField(controller: _chatSubtitle, decoration: const InputDecoration(labelText: 'Subtítulo')),
+                const SizedBox(height: RtSpace.md),
+                TextField(controller: _chatWelcome, maxLines: 2, decoration: const InputDecoration(labelText: 'Mensagem de boas-vindas')),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: RtSpace.md),
+        // SITE
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(RtSpace.md),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Site / App',
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleSmall
+                        ?.copyWith(fontWeight: FontWeight.w700)),
+                const SizedBox(height: RtSpace.md),
+                TextField(controller: _siteName, decoration: const InputDecoration(labelText: 'Nome do site/aplicativo')),
+                const SizedBox(height: RtSpace.md),
+                TextField(controller: _siteDescription, maxLines: 3, decoration: const InputDecoration(labelText: 'Descrição da campanha (Home)')),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: RtSpace.lg),
         RtButton(
           label: 'Salvar configurações',
           icon: Icons.save_rounded,
@@ -994,29 +1187,54 @@ class _AdminSettingsPageState extends ConsumerState<AdminSettingsPage> {
                 'phone': _phone.text.trim(),
                 'address': _address.text.trim(),
                 'hours': _hours.text.trim(),
+                'security_notice': _securityNotice.text.trim(),
               }};
               await repo.upsertSetting('contact', contact);
 
               final site = {...current['site'] ?? const {}, 'name': _siteName.text.trim()};
               await repo.upsertSetting('site', site);
 
-              final platform = {
-                ...current['platform'] ?? const {},
-                'description': _siteDescription.text.trim(),
-              };
+              final platform = {...current['platform'] ?? const {}, 'description': _siteDescription.text.trim()};
               await repo.upsertSetting('platform', platform);
 
-              final agenda = {
-                ...current['agenda'] ?? const {},
-                'disclaimer': _agendaDisclaimer.text.trim(),
-              };
+              final agenda = {...current['agenda'] ?? const {}, 'disclaimer': _agendaDisclaimer.text.trim()};
               await repo.upsertSetting('agenda', agenda);
 
-              final chat = {
-                ...current['chat'] ?? const {},
+              final hero = {...current['hero'] ?? const {}, ...{
+                'portrait_url': _heroPortraitUrl.text.trim(),
+                'subtitle': _heroSubtitle.text.trim(),
+              }};
+              await repo.upsertSetting('hero', hero);
+
+              final campaign = {...current['campaign'] ?? const {}, ...{
+                'name': _campaignName.text.trim(),
+                'election_year': int.tryParse(_campaignElectionYear.text.trim()) ?? 2026,
+                'portrait_url': _campaignPortraitUrl.text.trim(),
+              }};
+              await repo.upsertSetting('campaign', campaign);
+
+              final cta = {...current['cta'] ?? const {}, ...{
+                'label': _ctaLabel.text.trim(),
+                'subtitle': _ctaSubtitle.text.trim(),
+                'download_plan_button': _ctaDownloadButton.text.trim(),
+                'color': _ctaColor.text.trim(),
+              }};
+              await repo.upsertSetting('cta', cta);
+
+              final transparency = {...current['transparency'] ?? const {}, ...{
+                'title': _transparencyTitle.text.trim(),
+                'subtitle': _transparencySubtitle.text.trim(),
+                'description': _transparencyDescription.text.trim(),
+              }};
+              await repo.upsertSetting('transparency', transparency);
+
+              final chat = {...current['chat'] ?? const {}, ...{
+                'title': _chatTitle.text.trim(),
+                'subtitle': _chatSubtitle.text.trim(),
                 'welcome': _chatWelcome.text.trim(),
-              };
+              }};
               await repo.upsertSetting('chat', chat);
+
               ref.invalidate(settingsProvider);
             } finally {
               setState(() => _saving = false);

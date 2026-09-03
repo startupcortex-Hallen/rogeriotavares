@@ -1,6 +1,9 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../config/env.dart';
 import '../providers/app_providers.dart';
 import 'admin_crud.dart';
 import 'admin_utils.dart';
@@ -33,6 +36,7 @@ class AdminNewsList extends ConsumerWidget {
         const FieldSpec('content', 'Conteúdo (markdown)', type: FieldType.textarea, maxLines: 8),
         FieldSpec('category_id', 'Categoria', type: FieldType.select, optionLoader: categories),
         const FieldSpec('author', 'Autor'),
+        const FieldSpec('source', 'Fonte (link da notícia)'),
         const FieldSpec('image_url', 'Imagem de capa', type: FieldType.image, bucket: 'news'),
         const FieldSpec('video_url', 'URL do vídeo (YouTube)'),
         const FieldSpec('tags', 'Tags (separadas por vírgula)', type: FieldType.textarea, maxLines: 2),
@@ -72,6 +76,9 @@ class AdminPlanList extends ConsumerWidget {
         const FieldSpec('slug', 'URL (slug)', required: true),
         const FieldSpec('summary', 'Resumo', type: FieldType.textarea, maxLines: 3),
         const FieldSpec('description', 'Descrição', type: FieldType.textarea, maxLines: 6),
+        const FieldSpec('objectives', 'Objetivos (um por linha)', type: FieldType.lines, maxLines: 4),
+        const FieldSpec('benefits', 'Benefícios (um por linha)', type: FieldType.lines, maxLines: 4),
+        const FieldSpec('pdf_url', 'URL do PDF do plano'),
         FieldSpec('category_id', 'Categoria', type: FieldType.select, optionLoader: categories),
         const FieldSpec('progress', 'Progresso (0-100)', type: FieldType.number),
         const FieldSpec('status', 'Status', type: FieldType.status, options: ['planejado', 'em_andamento', 'concluido']),
@@ -110,6 +117,9 @@ class AdminEventsList extends ConsumerWidget {
         const FieldSpec('location_name', 'Local'),
         const FieldSpec('address', 'Endereço'),
         const FieldSpec('starts_at', 'Início', type: FieldType.datetime, required: true),
+        const FieldSpec('ends_at', 'Fim', type: FieldType.datetime),
+        const FieldSpec('latitude', 'Latitude', type: FieldType.decimal),
+        const FieldSpec('longitude', 'Longitude', type: FieldType.decimal),
         const FieldSpec('event_type', 'Tipo', type: FieldType.select, options: ['reuniao', 'caminhada', 'live', 'caravana', 'plenaria', 'debate', 'visita', 'programa', 'outro']),
         const FieldSpec('status', 'Status', type: FieldType.status, options: ['agendado', 'acontecendo', 'concluido', 'cancelado']),
         const FieldSpec('image_url', 'Imagem', type: FieldType.image, bucket: 'candidate'),
@@ -147,8 +157,8 @@ class AdminCitiesList extends ConsumerWidget {
         FieldSpec('slug', 'URL (slug)', required: true),
         FieldSpec('state', 'UF'),
         FieldSpec('region', 'Região'),
-        FieldSpec('latitude', 'Latitude', type: FieldType.number, required: true),
-        FieldSpec('longitude', 'Longitude', type: FieldType.number, required: true),
+        FieldSpec('latitude', 'Latitude', type: FieldType.decimal, required: true),
+        FieldSpec('longitude', 'Longitude', type: FieldType.decimal, required: true),
         FieldSpec('population', 'População', type: FieldType.number),
         FieldSpec('image_url', 'Imagem', type: FieldType.image, bucket: 'candidate'),
         FieldSpec('is_active', 'Ativa', type: FieldType.boolField),
@@ -175,6 +185,7 @@ class AdminGalleryList extends ConsumerWidget {
         FieldSpec('category', 'Categoria', type: FieldType.select, options: ['geral', 'eventos', 'retratos', 'educacao', 'saude', 'caminhadas', 'caravanas', 'imprensa', 'esporte', 'cultura']),
         FieldSpec('album', 'Álbum'),
         FieldSpec('image_url', 'Imagem', type: FieldType.image, bucket: 'gallery'),
+        FieldSpec('video_url', 'URL do vídeo (se houver)', type: FieldType.text),
         FieldSpec('is_video', 'É vídeo?', type: FieldType.boolField),
         FieldSpec('is_story', 'É story?', type: FieldType.boolField),
         FieldSpec('sort_order', 'Ordem', type: FieldType.number),
@@ -200,6 +211,7 @@ class AdminVideosList extends ConsumerWidget {
         FieldSpec('title', 'Título', required: true),
         FieldSpec('description', 'Descrição', type: FieldType.textarea, maxLines: 3),
         FieldSpec('youtube_id', 'ID do YouTube'),
+        FieldSpec('video_url', 'URL do vídeo (arquivo / não-Youtube)'),
         FieldSpec('thumbnail_url', 'Miniatura', type: FieldType.image, bucket: 'videos'),
         FieldSpec('video_type', 'Tipo', type: FieldType.select, options: ['live', 'entrevista', 'reel', 'programa', 'outro']),
         FieldSpec('category', 'Categoria', type: FieldType.select, options: ['geral', 'Saúde', 'Educação', 'Imprensa', 'Caravanas', 'Lives', 'Redes']),
@@ -216,15 +228,53 @@ class AdminDownloadsList extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    /// Envia um PDF diretamente para o bucket downloads e mostra a URL.
-    Future<void> uploadPdf() async {
-      final scaffold = ScaffoldMessenger.of(context);
-      final path = 'materiais/${DateTime.now().millisecondsSinceEpoch}.pdf';
-      scaffold.showSnackBar(SnackBar(
-        content: Text(
-            'Para PDF: envie via Supabase Storage (bucket "downloads") e cole a URL do arquivo no campo "Arquivo". Ex.: $path'),
-        duration: const Duration(seconds: 6),
-      ));
+    /// Envia um PDF direto ao bucket downloads e cria o registro.
+    Future<void> uploadPdf(BuildContext context, WidgetRef ref) async {
+      final messenger = ScaffoldMessenger.of(context);
+      try {
+        final result = await FilePicker.platform.pickFiles(
+          type: FileType.custom,
+          allowedExtensions: ['pdf'],
+          withData: true,
+        );
+        if (result == null || result.files.isEmpty) return;
+        final file = result.files.single;
+        final bytes = file.bytes;
+        if (bytes == null) {
+          messenger.showSnackBar(const SnackBar(
+              content: Text('Não foi possível ler o arquivo neste navegador.')));
+          return;
+        }
+        final safeName =
+            file.name.replaceAll(RegExp(r'[^A-Za-z0-9._-]'), '_');
+        final path =
+            'materiais/${DateTime.now().millisecondsSinceEpoch}-$safeName';
+        final client = ref.read(supabaseProvider);
+        await client.storage.from('downloads').uploadBinary(path, bytes);
+        final url = Env.storageUrl('downloads', path);
+        final title = file.name
+            .replaceAll(RegExp(r'\.pdf$'), '')
+            .replaceAll(RegExp(r'[_]+'), ' ')
+            .trim();
+        await client.from('downloads').insert({
+          'title': title.isEmpty ? 'Material oficial' : title,
+          'description': 'Enviado pelo painel administrativo.',
+          'file_url': url,
+          'file_type': 'pdf',
+          'file_size': bytes.length,
+          'icon': 'picture_as_pdf_rounded',
+          'sort_order': 0,
+          'is_active': true,
+        });
+        invalidateAdminRows(ref);
+        messenger.showSnackBar(
+            SnackBar(content: Text('PDF publicado: ${file.name}')));
+      } on StorageException catch (e) {
+        messenger.showSnackBar(SnackBar(
+            content: Text('Falha no upload (HTTP ${e.statusCode}): ${e.message}')));
+      } catch (e) {
+        messenger.showSnackBar(SnackBar(content: Text('Erro: $e')));
+      }
     }
 
     return AdminCrudPage(
@@ -245,9 +295,9 @@ class AdminDownloadsList extends ConsumerWidget {
         FieldSpec('is_active', 'Ativo', type: FieldType.boolField),
       ],
       extraActions: FilledButton.tonalIcon(
-        onPressed: uploadPdf,
-        icon: const Icon(Icons.info_outline_rounded, size: 18),
-        label: const Text('Como enviar PDF'),
+        onPressed: () => uploadPdf(context, ref),
+        icon: const Icon(Icons.upload_file_rounded, size: 18),
+        label: const Text('Enviar PDF'),
       ),
     );
   }

@@ -96,6 +96,11 @@ class ParticipationRepository {
     }).eq('id', id);
   }
 
+  /// Grava uma nota interna/visível em uma demanda (sem mudar o status).
+  Future<void> updateReportNote(String id, String note) async {
+    await _client.from('reports').update({'admin_note': note}).eq('id', id);
+  }
+
   Future<void> deleteReport(String id) async =>
       _client.from('reports').delete().eq('id', id);
 }
